@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConceptLab AI</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root { --ink:#14213d; --accent:#5b5bd6; --soft:#f4f5ff; --line:#dfe3ee; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter, ui-sans-serif, system-ui, sans-serif; color:var(--ink); background:#fafbff; }
+    header { padding:26px 6vw 16px; display:flex; justify-content:space-between; align-items:center; }
+    .brand { font-weight:850; font-size:1.35rem; }
+    .badge { background:#e9e9ff; color:#3939a8; padding:7px 11px; border-radius:999px; font-size:.82rem; }
+    main { max-width:1120px; margin:auto; padding:18px 24px 60px; }
+    .hero { text-align:center; padding:44px 10px 34px; }
+    h1 { font-size:clamp(2.4rem,6vw,5rem); line-height:.97; margin:0 0 18px; letter-spacing:-.055em; }
+    .hero p { font-size:1.1rem; color:#556078; max-width:680px; margin:0 auto 28px; }
+    .prompt { display:grid; grid-template-columns:1fr 150px 145px; gap:10px; max-width:860px; margin:auto; }
+    input, select, textarea, button { font:inherit; }
+    input, select, textarea { width:100%; border:1px solid var(--line); border-radius:13px; padding:14px; background:white; }
+    button { border:0; border-radius:13px; padding:14px 18px; font-weight:750; cursor:pointer; background:var(--accent); color:white; }
+    button.secondary { background:white; color:var(--ink); border:1px solid var(--line); }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .status { text-align:center; min-height:30px; color:#667085; margin-top:14px; }
+    .grid { display:grid; grid-template-columns:1.25fr .75fr; gap:18px; margin-top:22px; }
+    .card { background:white; border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:0 8px 30px rgba(33,43,75,.05); margin-bottom:18px; }
+    .card h2,.card h3 { margin-top:0; }
+    .pill { display:inline-block; background:var(--soft); border-radius:999px; padding:6px 10px; margin:3px; font-size:.85rem; }
+    pre { white-space:pre-wrap; background:#101827; color:#eef2ff; border-radius:13px; padding:16px; overflow:auto; }
+    .quiz-option { display:block; padding:10px; margin:6px 0; border:1px solid var(--line); border-radius:10px; }
+    .score { font-size:3rem; font-weight:900; letter-spacing:-.05em; }
+    #lessonView { display:none; }
+    #community { margin-top:36px; }
+    .community-item { border-left:4px solid var(--accent); }
+    @media(max-width:760px) {
+      .prompt,.grid { grid-template-columns:1fr; }
+      h1 { font-size:3rem; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">ConceptLab AI</div>
+  <div class="badge">Learn • Build • Teach • Share</div>
+</header>
+<main>
+  <section class="hero">
+    <h1>Learn anything<br>by building it.</h1>
+    <p>Generate a lesson, run an experiment, prove understanding through Teach Back, and publish the result for the learning community.</p>
+    <div class="prompt">
+      <input id="topic" value="Binary Search" placeholder="What do you want to learn?" />
+      <select id="level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+      <button id="generateBtn" onclick="generateLesson()">Build my lab</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section id="lessonView">
+    <div class="grid">
+      <div>
+        <article class="card">
+          <h2 id="lessonTitle"></h2>
+          <strong id="hook"></strong>
+          <p id="explanation"></p>
+          <h3>Analogy</h3><p id="analogy"></p>
+          <div id="keyIdeas"></div>
+        </article>
+        <article class="card">
+          <h2>Visual model</h2>
+          <div class="mermaid" id="diagram"></div>
+        </article>
+        <article class="card">
+          <h2 id="experimentTitle">Build experiment</h2>
+          <ol id="instructions"></ol>
+          <pre id="starterCode"></pre>
+          <h3>Try changing</h3><div id="changes"></div>
+        </article>
+      </div>
+      <div>
+        <article class="card">
+          <h2>Quick check</h2>
+          <div id="quiz"></div>
+          <button class="secondary" onclick="gradeQuiz()">Check answers</button>
+          <p id="quizResult"></p>
+        </article>
+        <article class="card">
+          <h2>Teach Back</h2>
+          <p id="teachPrompt"></p>
+          <textarea id="teachback" rows="8" placeholder="Explain the concept in your own words..."></textarea>
+          <button style="margin-top:10px" onclick="evaluateTeachback()">Evaluate understanding</button>
+          <div id="evaluation"></div>
+        </article>
+        <article class="card">
+          <h2>Share the learning</h2>
+          <p>Publish this lesson and your evidence of understanding as a reusable community learning artifact.</p>
+          <button onclick="publishLesson()">Publish Learning Card</button>
+          <p id="publishResult"></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="community">
+    <h2>Community Learning Cards</h2>
+    <div id="communityList"><p>No cards yet. Complete and publish the first one.</p></div>
+  </section>
+</main>
+
+<script>
+mermaid.initialize({ startOnLoad:false, theme:"neutral" });
+let lesson = null;
+let evaluation = null;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function generateLesson(){
+  const btn=document.getElementById("generateBtn");
+  btn.disabled=true; setStatus("GPT-5.6 is designing your learning lab…");
+  try{
+    const res=await fetch("/api/lesson",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({topic:topic.value,level:level.value})});
+    if(!res.ok) throw new Error((await res.json()).detail || "Generation failed");
+    lesson=await res.json(); evaluation=null; renderLesson();
+    setStatus("Your lab is ready.");
+  }catch(e){ setStatus("Error: "+e.message); }
+  finally{ btn.disabled=false; }
+}
+
+function renderLesson(){
+  lessonView.style.display="block";
+  lessonTitle.textContent=lesson.topic+" · "+lesson.level;
+  hook.textContent=lesson.hook;
+  explanation.textContent=lesson.explanation;
+  analogy.textContent=lesson.analogy;
+  keyIdeas.innerHTML=lesson.key_ideas.map(x=>`<span class="pill">${esc(x)}</span>`).join("");
+  diagram.textContent=lesson.diagram;
+  diagram.removeAttribute("data-processed");
+  mermaid.run({nodes:[diagram]}).catch(()=>{diagram.textContent=lesson.diagram});
+  experimentTitle.textContent=lesson.experiment.title;
+  instructions.innerHTML=lesson.experiment.instructions.map(x=>`<li>${esc(x)}</li>`).join("");
+  starterCode.textContent=lesson.experiment.starter_code;
+  changes.innerHTML=lesson.experiment.things_to_change.map(x=>`<span class="pill">${esc(x)}</span>`).join("");
+  quiz.innerHTML=lesson.quiz.map((q,i)=>`
+    <div><strong>${i+1}. ${esc(q.question)}</strong>
+    ${q.options.map((o,j)=>`<label class="quiz-option"><input type="radio" name="q${i}" value="${j}"> ${esc(o)}</label>`).join("")}</div>`).join("");
+  teachPrompt.textContent=lesson.teach_back_prompt;
+  document.getElementById("evaluation").innerHTML="";
+  publishResult.textContent=""; quizResult.textContent="";
+  lessonView.scrollIntoView({behavior:"smooth"});
+}
+
+function gradeQuiz(){
+  let correct=0;
+  lesson.quiz.forEach((q,i)=>{
+    const selected=document.querySelector(`input[name=q${i}]:checked`);
+    if(selected && Number(selected.value)===q.answer_index) correct++;
+  });
+  quizResult.textContent=`${correct}/${lesson.quiz.length} correct.`;
+}
+
+async function evaluateTeachback(){
+  if(!lesson) return;
+  const explanation=teachback.value.trim();
+  if(explanation.length<5){ evaluation.innerHTML="<p>Please write a fuller explanation.</p>"; return; }
+  evaluation.innerHTML="<p>Evaluating reasoning…</p>";
+  const res=await fetch("/api/teachback",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({topic:lesson.topic,explanation})});
+  const data=await res.json();
+  if(!res.ok){ evaluation.innerHTML=`<p>${esc(data.detail||"Evaluation failed")}</p>`; return; }
+  evaluation=data;
+  document.getElementById("evaluation").innerHTML=`
+    <div class="score">${esc(data.mastery_score)}%</div><strong>${esc(data.verdict)}</strong>
+    <h3>Strengths</h3><ul>${data.strengths.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    <h3>Gaps</h3><ul>${data.gaps.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+    <h3>Improved explanation</h3><p>${esc(data.improved_explanation)}</p>
+    <h3>Next challenge</h3><p>${esc(data.next_challenge)}</p>`;
+}
+
+async function publishLesson(){
+  if(!lesson) return;
+  const res=await fetch("/api/publish",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({lesson,learner_explanation:teachback.value,evaluation})});
+  const item=await res.json();
+  publishResult.textContent=`Published Learning Card #${item.id}`;
+  loadCommunity();
+}
+
+async function loadCommunity(){
+  const items=await (await fetch("/api/community")).json();
+  communityList.innerHTML=items.length?items.map(x=>`
+    <article class="card community-item">
+      <h3>${esc(x.lesson.topic)}</h3>
+      <p>${esc(x.lesson.hook)}</p>
+      <span class="pill">${esc(x.lesson.level)}</span>
+      ${x.evaluation?`<span class="pill">Mastery ${esc(x.evaluation.mastery_score)}%</span>`:""}
+      <span class="pill">Forkable</span>
+    </article>`).join(""):"<p>No cards yet.</p>";
+}
+loadCommunity();
+
+function setStatus(message){ status.textContent=message; }
+</script>
+</body>
+</html>
