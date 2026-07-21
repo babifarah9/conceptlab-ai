@@ -110,7 +110,7 @@
 <script>
 mermaid.initialize({ startOnLoad:false, theme:"neutral" });
 let lesson = null;
-let evaluation = null;
+let evaluationResult = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -121,7 +121,7 @@ async function generateLesson(){
     const res=await fetch("/api/lesson",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({topic:topic.value,level:level.value})});
     if(!res.ok) throw new Error((await res.json()).detail || "Generation failed");
-    lesson=await res.json(); evaluation=null; renderLesson();
+    lesson=await res.json(); evaluationResult=null; renderLesson();
     setStatus("Your lab is ready.");
   }catch(e){ setStatus("Error: "+e.message); }
   finally{ btn.disabled=false; }
@@ -162,13 +162,13 @@ function gradeQuiz(){
 async function evaluateTeachback(){
   if(!lesson) return;
   const explanation=teachback.value.trim();
-  if(explanation.length<5){ evaluation.innerHTML="<p>Please write a fuller explanation.</p>"; return; }
-  evaluation.innerHTML="<p>Evaluating reasoning…</p>";
+  if(explanation.length<5){ document.getElementById("evaluation").innerHTML="<p>Please write a fuller explanation.</p>"; return; }
+  document.getElementById("evaluation").innerHTML="<p>Evaluating reasoning…</p>";
   const res=await fetch("/api/teachback",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({topic:lesson.topic,explanation})});
   const data=await res.json();
-  if(!res.ok){ evaluation.innerHTML=`<p>${esc(data.detail||"Evaluation failed")}</p>`; return; }
-  evaluation=data;
+  if(!res.ok){ document.getElementById("evaluation").innerHTML=`<p>${esc(data.detail||"Evaluation failed")}</p>`; return; }
+  evaluationResult=data;
   document.getElementById("evaluation").innerHTML=`
     <div class="score">${esc(data.mastery_score)}%</div><strong>${esc(data.verdict)}</strong>
     <h3>Strengths</h3><ul>${data.strengths.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
@@ -180,7 +180,7 @@ async function evaluateTeachback(){
 async function publishLesson(){
   if(!lesson) return;
   const res=await fetch("/api/publish",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({lesson,learner_explanation:teachback.value,evaluation})});
+    body:JSON.stringify({lesson,learner_explanation:teachback.value,evaluation:evaluationResult})});
   const item=await res.json();
   publishResult.textContent=`Published Learning Card #${item.id}`;
   loadCommunity();
