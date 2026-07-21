@@ -45,10 +45,10 @@ future learners.
 
 ## Run locally
 
-Python 3.10+ is recommended.
+Python 3.9+ is supported.
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone https://github.com/babifarah9/conceptlab-ai.git
 cd conceptlab-ai
 
 python3 -m venv .venv
@@ -134,4 +134,4 @@ The core product decisions remained human-directed:
 
 ## License
 
-MIT — replace this section if you choose another license.
+MIT License. See [LICENSE](LICENSE).
