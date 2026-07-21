@@ -14,19 +14,19 @@ Learning Card.
 
 ### AI Learning Lab
 
-![AI Learning Lab](screenshots/Concept-Screenshot 2026-07-21 at 7.38.48 PM.png)
+![AI Learning Lab](screenshots/learninglab.png)
 
 ### Diagram
 
-![Teach Back Evaluation](screenshots/Concept-Screenshot 2026-07-21 at 7.39.10 PM.png)
+![Teach Back Evaluation](screenshots/diagram.png)
 
 ### Teach Back Evaluation
 
-![Teach Back Evaluation](screenshots/Concept-Screenshot 2026-07-21 at 7.40.19 PM.png)
+![Teach Back Evaluation](screenshots/teachback.png)
 
 ### Community Learning Cards
 
-![Community Learning Cards](screenshots/Concept-Screenshot 2026-07-21 at 7.41.02 PM.png)
+![Community Learning Cards](screenshots/communitycard.png)
 
 ## Why it is different
 
