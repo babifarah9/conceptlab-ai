@@ -38,6 +38,40 @@ loop:
 Each private AI interaction can become a reusable learning artifact that helps
 future learners.
 
+## 🤖 AI-Assisted Development
+
+### GPT-5.6
+
+ConceptLab AI uses GPT-5.6 through the OpenAI Responses API to power the learning experience.
+
+GPT-5.6 is responsible for:
+
+- Generating structured lessons
+- Creating intuitive analogies
+- Producing Mermaid concept diagrams
+- Generating Python practice exercises
+- Creating quizzes
+- Evaluating the learner's Teach Back explanation
+- Identifying misconceptions
+- Providing personalized feedback and mastery estimates
+
+### Codex
+
+Codex was used throughout development as an AI engineering assistant.
+
+Examples include:
+
+- Reviewing the FastAPI application architecture
+- Debugging frontend/backend integration
+- Identifying JavaScript issues
+- Fixing Python compatibility problems
+- Verifying API request and response contracts
+- Improving documentation
+- Reviewing the repository before submission
+
+Development followed an iterative workflow where Codex inspected the codebase, proposed fixes, validated implementations, and helped improve overall code quality.
+
+Selected development prompts are available in **CODEX_DEVELOPMENT_LOG.md**.
 ## Build Week track
 
 **Education**
