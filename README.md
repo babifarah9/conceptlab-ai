@@ -10,6 +10,24 @@ explanation for accuracy, missing ideas, and misconceptions. Finally, the learne
 can publish the lesson and evidence of understanding as a reusable community
 Learning Card.
 
+## Product Preview
+
+### AI Learning Lab
+
+![AI Learning Lab](screenshots/Concept-Screenshot 2026-07-21 at 7.38.48 PM.png)
+
+### Diagram
+
+![Teach Back Evaluation](screenshots/Concept-Screenshot 2026-07-21 at 7.39.10 PM.png)
+
+### Teach Back Evaluation
+
+![Teach Back Evaluation](screenshots/Concept-Screenshot 2026-07-21 at 7.40.19 PM.png)
+
+### Community Learning Cards
+
+![Community Learning Cards](screenshots/Concept-Screenshot 2026-07-21 at 7.41.02 PM.png)
+
 ## Why it is different
 
 Most AI tutors end after answering a question. ConceptLab AI closes the learning
